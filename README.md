@@ -1,125 +1,308 @@
-# Behaviorial Cloning Project
+# **Behavioral Cloning** 
 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
-
-Overview
 ---
-This repository contains starting files for the Behavioral Cloning Project.
 
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to clone driving behavior. You will train, validate and test a model using Keras. The model will output a steering angle to an autonomous vehicle.
+**Behavioral Cloning Project**
 
-We have provided a simulator where you can steer a car around a track for data collection. You'll use image data and steering angles to train a neural network and then use this model to drive the car autonomously around the track.
-
-We also want you to create a detailed writeup of the project. Check out the [writeup template](https://github.com/udacity/CarND-Behavioral-Cloning-P3/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup. The writeup can be either a markdown file or a pdf document.
-
-To meet specifications, the project will require submitting five files: 
-* model.py (script used to create and train the model)
-* drive.py (script to drive the car - feel free to modify this file)
-* model.h5 (a trained Keras model)
-* a report writeup file (either markdown or pdf)
-* video.mp4 (a video recording of your vehicle driving autonomously around the track for at least one full lap)
-
-This README file describes how to output the video in the "Details About Files In This Directory" section.
-
-Creating a Great Writeup
----
-A great writeup should include the [rubric points](https://review.udacity.com/#!/rubrics/432/view) as well as your description of how you addressed each point.  You should include a detailed description of the code used (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
-
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
-
-The Project
----
 The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior 
-* Design, train and validate a model that predicts a steering angle from image data
-* Use the model to drive the vehicle autonomously around the first track in the simulator. The vehicle should remain on the road for an entire loop around the track.
+* Use the simulator to collect data of good driving behavior
+* Build, a convolution neural network in Keras that predicts steering angles from images
+* Train and validate the model with a training and validation set
+* Test that the model successfully drives around track one without leaving the road
 * Summarize the results with a written report
 
-### Dependencies
-This lab requires:
+--- 
 
-* [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit)
+#### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
-The lab enviroment can be created with CarND Term1 Starter Kit. Click [here](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) for the details.
+My project includes the following files:
+* behavior_clone.py : containing the script to create and train the model
+* drive.py : for driving the car in autonomous mode
+* model-modeified-LeNet-Crop-Flip.h5 : containing a trained convolution neural network 
+* README.md : summarizing the results
+* autonomous-driving-track1.mp4 : autonomous driving video clip of track1
+* autonomous-driving-track2.mp4 : autonomous driving video clip of track2
 
-The following resources can be found in this github repository:
-* drive.py
-* video.py
-* writeup_template.md
-
-The simulator can be downloaded from the classroom. In the classroom, we have also provided sample data that you can optionally use to help train your model.
-
-## Details About Files In This Directory
-
-### `drive.py`
-
-Usage of `drive.py` requires you have saved the trained model as an h5 file, i.e. `model.h5`. See the [Keras documentation](https://keras.io/getting-started/faq/#how-can-i-save-a-keras-model) for how to create this file using the following command:
-```sh
-model.save(filepath)
-```
-
-Once the model has been saved, it can be used with drive.py using this command:
+#### 2. Submission includes functional code
+Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
 
 ```sh
-python drive.py model.h5
+python drive.py model-modeified-LeNet-Crop-Flip.h5
 ```
 
-The above command will load the trained model and use the model to make predictions on individual images in real-time and send the predicted angle back to the server via a websocket connection.
+#### 3. Submission code is usable and readable
 
-Note: There is known local system's setting issue with replacing "," with "." when using drive.py. When this happens it can make predicted steering values clipped to max/min values. If this occurs, a known fix for this is to add "export LANG=en_US.utf8" to the bashrc file.
+The behavior_clone.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model.
 
-#### Saving a video of the autonomous agent
 
-```sh
-python drive.py model.h5 run1
+### Model Architecture and Training Strategy
+
+#### 1. An appropriate model architecture has been employed
+
+Following shows the applied model architecture. The model is extended from LeNet.
+It gets 160 x 320 RGB image as an input and normalized by a Lambda function. In the next layer, the image is cropped and using '''tensorflow.image.rgb_to_grayscale(x)''' function 
+Applied 5 x 5 convolution with 6 filters, valid padding and relu activation. Then applied maxpooling of stride 1x1.
+This structure is repeated 4 times to get deeper network structure and feature map. 
+After flattening applied drop out of 0.1 rate before fully connected layer. Applied 3 fully connected layers.
+
+
+```
+____________________________________________________________________________________________________
+Layer (type)                     Output Shape          Param #     Connected to                     
+====================================================================================================
+lambda_1 (Lambda)                (None, 160, 320, 3)   0           lambda_input_1[0][0]             
+____________________________________________________________________________________________________
+cropping2d_1 (Cropping2D)        (None, 100, 320, 3)   0           lambda_1[0][0]                   
+____________________________________________________________________________________________________
+lambda_2 (Lambda)                (None, 100, 320, 1)   0           cropping2d_1[0][0]               
+____________________________________________________________________________________________________
+convolution2d_1 (Convolution2D)  (None, 96, 316, 6)    156         lambda_2[0][0]                   
+____________________________________________________________________________________________________
+maxpooling2d_1 (MaxPooling2D)    (None, 48, 158, 6)    0           convolution2d_1[0][0]            
+____________________________________________________________________________________________________
+convolution2d_2 (Convolution2D)  (None, 44, 154, 6)    906         maxpooling2d_1[0][0]             
+____________________________________________________________________________________________________
+maxpooling2d_2 (MaxPooling2D)    (None, 22, 77, 6)     0           convolution2d_2[0][0]            
+____________________________________________________________________________________________________
+convolution2d_3 (Convolution2D)  (None, 18, 73, 6)     906         maxpooling2d_2[0][0]             
+____________________________________________________________________________________________________
+maxpooling2d_3 (MaxPooling2D)    (None, 9, 36, 6)      0           convolution2d_3[0][0]            
+____________________________________________________________________________________________________
+convolution2d_4 (Convolution2D)  (None, 5, 32, 6)      906         maxpooling2d_3[0][0]             
+____________________________________________________________________________________________________
+maxpooling2d_4 (MaxPooling2D)    (None, 2, 16, 6)      0           convolution2d_4[0][0]            
+____________________________________________________________________________________________________
+flatten_1 (Flatten)              (None, 192)           0           maxpooling2d_4[0][0]             
+____________________________________________________________________________________________________
+dropout_1 (Dropout)              (None, 192)           0           flatten_1[0][0]                  
+____________________________________________________________________________________________________
+dense_1 (Dense)                  (None, 120)           23160       dropout_1[0][0]                  
+____________________________________________________________________________________________________
+dropout_2 (Dropout)              (None, 120)           0           dense_1[0][0]                    
+____________________________________________________________________________________________________
+dense_2 (Dense)                  (None, 84)            10164       dropout_2[0][0]                  
+____________________________________________________________________________________________________
+dense_3 (Dense)                  (None, 1)             85          dense_2[0][0]                    
+====================================================================================================
+Total params: 36,283
+Trainable params: 36,283
+Non-trainable params: 0
+____________________________________________________________________________________________________
+
 ```
 
-The fourth argument, `run1`, is the directory in which to save the images seen by the agent. If the directory already exists, it'll be overwritten.
+Following is the corresponding keras code snippet.
 
-```sh
-ls run1
-
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_424.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_451.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_477.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_528.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_573.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_618.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_697.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_723.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_749.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_817.jpg
-...
+```python
+model = Sequential()
+model.add(Lambda(lambda x : (x/255.) - 0.5,input_shape=(160,320,3)))
+model.add(Cropping2D(cropping=((40,20),(0,0))))
+model.add(Lambda(gray_conversion))
+model.add(Convolution2D(6,5,5, border_mode="valid", activation='relu'))
+model.add(MaxPooling2D())
+model.add(Convolution2D(6,5,5, border_mode="valid", activation='relu'))
+model.add(MaxPooling2D())
+model.add(Convolution2D(6,5,5, border_mode="valid", activation='relu'))
+model.add(MaxPooling2D())
+model.add(Convolution2D(6,5,5, border_mode="valid", activation='relu'))
+model.add(MaxPooling2D())
+model.add(Flatten())
+model.add(Dropout(0.4))
+model.add(Dense(120))
+model.add(Dropout(0.2))
+model.add(Dense(84))
+model.add(Dense(1))
+model.summary()
 ```
 
-The image file name is a timestamp of when the image was seen. This information is used by `video.py` to create a chronological video of the agent driving.
 
-### `video.py`
 
-```sh
-python video.py run1
+#### 2. Attempts to reduce overfitting in the model
+
+The model applied maxpooling and dropout layers in order to reduce overfitting.
+More importantly, I have collected lots of training data for better generalization.
+The training data was collected both from track1 and track2.
+The data contains also enough track recovery and corner cases.
+The model was trained and validated on different data sets to ensure that the model was not overfitting.
+The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+
+
+#### 3. Model parameter tuning
+
+The model used an adam optimizer, so the learning rate was not tuned manually.
+
+#### 4. Appropriate training data
+
+Training data was chosen to keep the vehicle driving on the road. I used a combination of 
+
+- center lane driving, 
+- counter clock driving,
+- recovering from the left,
+- recovering from right sides,
+- smooth cornering.. 
+
+
+### Model Architecture and Training Strategy
+
+#### 1. Solution Design Approach
+
+The overall strategy for deriving a model architecture was to extend the simple model used in the lecture. 
+
+My first step was to use a convolution neural network model similar to the LeNet.
+
+After testing the first model, it showed lots of flaws on the corner, it tend to get out of the track.
+
+Therefore, more data was collected by recording lots of recovering scenes from left and right sides.
+
+Applying cropping and grayscaling also helped improving accuracy of the model. 
+
+The driving was not smooth as expected, therefore augmented the dataset by flipping frames of center camera, left and right camera.
+
+Applying deeper convolutional layer also helped. 
+
+At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
+
+
+#### 2. Final Model Architecture
+
+```
+____________________________________________________________________________________________________
+Layer (type)                     Output Shape          Param #     Connected to                     
+====================================================================================================
+lambda_1 (Lambda)                (None, 160, 320, 3)   0           lambda_input_1[0][0]             
+____________________________________________________________________________________________________
+cropping2d_1 (Cropping2D)        (None, 100, 320, 3)   0           lambda_1[0][0]                   
+____________________________________________________________________________________________________
+lambda_2 (Lambda)                (None, 100, 320, 1)   0           cropping2d_1[0][0]               
+____________________________________________________________________________________________________
+convolution2d_1 (Convolution2D)  (None, 96, 316, 6)    156         lambda_2[0][0]                   
+____________________________________________________________________________________________________
+maxpooling2d_1 (MaxPooling2D)    (None, 48, 158, 6)    0           convolution2d_1[0][0]            
+____________________________________________________________________________________________________
+convolution2d_2 (Convolution2D)  (None, 44, 154, 6)    906         maxpooling2d_1[0][0]             
+____________________________________________________________________________________________________
+maxpooling2d_2 (MaxPooling2D)    (None, 22, 77, 6)     0           convolution2d_2[0][0]            
+____________________________________________________________________________________________________
+convolution2d_3 (Convolution2D)  (None, 18, 73, 6)     906         maxpooling2d_2[0][0]             
+____________________________________________________________________________________________________
+maxpooling2d_3 (MaxPooling2D)    (None, 9, 36, 6)      0           convolution2d_3[0][0]            
+____________________________________________________________________________________________________
+convolution2d_4 (Convolution2D)  (None, 5, 32, 6)      906         maxpooling2d_3[0][0]             
+____________________________________________________________________________________________________
+maxpooling2d_4 (MaxPooling2D)    (None, 2, 16, 6)      0           convolution2d_4[0][0]            
+____________________________________________________________________________________________________
+flatten_1 (Flatten)              (None, 192)           0           maxpooling2d_4[0][0]             
+____________________________________________________________________________________________________
+dropout_1 (Dropout)              (None, 192)           0           flatten_1[0][0]                  
+____________________________________________________________________________________________________
+dense_1 (Dense)                  (None, 120)           23160       dropout_1[0][0]                  
+____________________________________________________________________________________________________
+dropout_2 (Dropout)              (None, 120)           0           dense_1[0][0]                    
+____________________________________________________________________________________________________
+dense_2 (Dense)                  (None, 84)            10164       dropout_2[0][0]                  
+____________________________________________________________________________________________________
+dense_3 (Dense)                  (None, 1)             85          dense_2[0][0]                    
+====================================================================================================
+Total params: 36,283
+Trainable params: 36,283
+Non-trainable params: 0
+____________________________________________________________________________________________________
+
 ```
 
-Creates a video based on images found in the `run1` directory. The name of the video will be the name of the directory followed by `'.mp4'`, so, in this case the video will be `run1.mp4`.
 
-Optionally, one can specify the FPS (frames per second) of the video:
+#### 3. Creation of the Training Set & Training Process
 
-```sh
-python video.py run1 --fps 48
+Volume of collected dataset 
+
+![](./imgs/dataset.png)
+
+To cope with inbalnce of the data volume merged dataset as shown below.
+
+![](./imgs/merging_datasets.png)
+
+Used left - center - right images all together.
+
+![](./imgs/left-center-right.png)
+
+
+The key to avoid overfitting and generalization was to augment data by flipping every frame. 
+this way 6 image frames are acquired ( left center right, left-flip, center-flip, right-flip )
+
+
+```python
+        # center,left,right,steering,throttle,brake,speed
+        center_image = load_image(get_current_path(line[0]))
+        center_angle = float(line[3])
+        images.append(center_image)
+        angles.append(center_angle)
+        
+        ## Augment dataset by adding flipped image and its measurement
+        ## Center & flipped
+        center_image_flipped = np.fliplr(center_image)    
+        center_angle_flipped = center_angle*(-1)
+        images.append(center_image_flipped)
+        angles.append(center_angle_flipped)
+        
+        ## Left & flipped
+        left_image = load_image(get_current_path(line[1]))
+        left_angle = center_angle + cam_delta_left
+        images.append(left_image)
+        angles.append(left_angle)        
+        
+        left_image_flipped = np.fliplr(left_image)    
+        left_angle_flipped = left_angle*(-1)
+        images.append(left_image_flipped)
+        angles.append(left_angle_flipped)
+
+        ## Right & flipped
+        right_image = load_image(get_current_path(line[2]))
+        right_angle = center_angle - cam_delta_right
+        images.append(right_image)
+        angles.append(right_angle)
+
+        right_image_flipped = np.fliplr(right_image)    
+        right_angle_flipped = right_angle*(-1)
+        images.append(right_image_flipped)
+        angles.append(right_angle_flipped)
 ```
 
-Will run the video at 48 FPS. The default FPS is 60.
 
-#### Why create a video
+The augmented data, if all are loaded became in total around 110 GB 
 
-1. It's been noted the simulator might perform differently based on the hardware. So if your model drives succesfully on your machine it might not on another machine (your reviewer). Saving a video is a solid backup in case this happens.
-2. You could slightly alter the code in `drive.py` and/or `video.py` to create a video of what your model sees after the image is processed (may be helpful for debugging).
+![](./imgs/resource_consumption.png)
 
-### Tips
-- Please keep in mind that training images are loaded in BGR colorspace using cv2 while drive.py load images in RGB to predict the steering angles.
+* generator was also implemented and can be used. (code line 182 )
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+```python
+model.fit_generator(train_generator, \
+            samples_per_epoch=len(train_samples), \
+            validation_data=validation_generator, \
+            nb_val_samples=len(validation_samples), nb_epoch=nb_epoch)
+```
+
+
+Applied 5 epoch in total, mean square error was slightly going down.
+In this model, the mean square error looks a bit bigger than the numbers we used to see in the lecture, because of the big data volume.
+
+```bash
+382945/382945 [==============================] - 539s - loss: 0.1290 - val_loss: 0.1144
+Epoch 2/5
+382945/382945 [==============================] - 627s - loss: 0.1164 - val_loss: 0.1105
+Epoch 3/5
+382945/382945 [==============================] - 629s - loss: 0.1139 - val_loss: 0.1130
+Epoch 4/5
+382945/382945 [==============================] - 625s - loss: 0.1126 - val_loss: 0.1071
+Epoch 5/5
+382945/382945 [==============================] - 623s - loss: 0.1115 - val_loss: 0.1064
+```
+
+Although the model worked very well, its size is quite small as, I've applied grayscale image in the second layer. 
+
+```
+470K model-modeified-LeNet-Crop-Flip.h5
+```
+
+
+
 
