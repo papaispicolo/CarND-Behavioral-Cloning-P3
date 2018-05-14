@@ -22,6 +22,7 @@ My project includes the following files:
 * README.md : summarizing the results
 * autonomous-driving-track1.mp4 : autonomous driving video clip of track1
 * autonomous-driving-track2.mp4 : autonomous driving video clip of track2
+  (the model drove track 2 quite well, except that it often stuck at a track where it had drastic corner with shadow.)
 
 #### 2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
@@ -303,6 +304,21 @@ Although the model worked very well, its size is quite small as, I've applied gr
 470K model-modeified-LeNet-Crop-Flip.h5
 ```
 
+### Usage 
 
+```python
+$ python drive.py model-modeified-LeNet-Crop-Flip.h5 autonomous-driving-track1 
+```
 
+```python
+$ python drive.py model-modeified-LeNet-Crop-Flip.h5 autonomous-driving-track2
+```
+
+```python
+$ python video.py autonomous-driving-track1 --fps 60
+```
+
+```python
+$ python video.py autonomous-driving-track2 --fps 60
+```
 
